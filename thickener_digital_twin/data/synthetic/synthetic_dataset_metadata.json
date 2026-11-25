@@ -1,0 +1,46 @@
+{
+  "data_status": "SYNTHETIC",
+  "is_plant_measured": false,
+  "warning": "SYNTHETIC DATASET ONLY: Generated from physics equations and assumed parameters for development and testing. Never present as measured Project 4 plant data.",
+  "source_reference": "Simulation and AI Modeling Projects for Mineral Processing \u2014 Project 4 (\u00a75.6, \u00a75.8)",
+  "n_rows": 500,
+  "random_seed": 42,
+  "columns": [
+    "record_id",
+    "data_source_label",
+    "feed_rate_tph",
+    "feed_rate_basis",
+    "feed_solids_wt_pct",
+    "flocculant_dose_gpt",
+    "underflow_withdrawal_tph",
+    "underflow_basis",
+    "free_settling_velocity_mph",
+    "rz_exponent_n",
+    "thickener_area_m2",
+    "underflow_solids_wt_pct",
+    "overflow_clarity_index",
+    "bed_level_m",
+    "yield_stress_pa",
+    "pump_pressure_required_bar",
+    "pumpability_flag"
+  ],
+  "noise_assumptions": {
+    "underflow_solids_wt_pct_sigma": 0.35,
+    "overflow_clarity_index_sigma": 1.2
+  },
+  "reference_ranges_covered": {
+    "feed_solids_wt_pct": [
+      4.014,
+      14.986
+    ],
+    "flocculant_dose_gpt": [
+      10.016,
+      39.983
+    ],
+    "underflow_solids_wt_pct": [
+      50.675,
+      69.11
+    ]
+  },
+  "pump_limited_fraction_pct": 4.4
+}

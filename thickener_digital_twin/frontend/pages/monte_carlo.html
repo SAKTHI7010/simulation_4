@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monte Carlo Analysis — Thickener Digital Twin</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body data-page="monte_carlo">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-tag">Project 4 • §5.6 &amp; §5.8</span>
+        <h1>Thickener Digital Twin</h1>
+        <p>Settling-Flux &amp; Pumpability Simulator</p>
+      </div>
+      <nav class="nav-links">
+        <a class="nav-link" href="/index.html">1. Dashboard</a>
+        <a class="nav-link" href="/pages/flux.html">2. Settling Flux Analysis</a>
+        <a class="nav-link" href="/pages/dynamics.html">3. Dynamic Simulation</a>
+        <a class="nav-link" href="/pages/pumpability.html">4. Pumpability Analysis</a>
+        <a class="nav-link active" href="/pages/monte_carlo.html">5. Monte Carlo Analysis</a>
+        <a class="nav-link" href="/pages/scenario.html">6. Scenario Analysis</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="health-pill">
+          <span id="health-dot" class="health-dot"></span>
+          <span id="health-text">Checking API...</span>
+        </div>
+        <div>Reproducible Seeded Trials</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="synthetic-banner">
+        <span>SYNTHETIC UNCERTAINTY PROPAGATION — Input distributions (normal, clipped) and CVs are assumed until site variability data are available.</span>
+        <span class="badge badge-synthetic">SYNTHETIC MONTE CARLO</span>
+      </div>
+
+      <div class="page-container">
+        <div class="page-header">
+          <div>
+            <h2>Monte Carlo Uncertainty Analysis</h2>
+            <p>Quantify underflow % solids spread (Mean, SD, P5/P95) and probability of pumpability or flux-area violation.</p>
+          </div>
+        </div>
+
+        <div id="page-error" class="alert hidden"></div>
+
+        <section class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Underflow Mean</div>
+            <div class="kpi-value" id="kpi-mc-mean">—</div>
+            <div class="kpi-sub" id="kpi-mc-std">Std dev</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">P5 – P95 Interval</div>
+            <div class="kpi-value" id="kpi-mc-p5-p95">—</div>
+            <div class="kpi-sub">90% confidence band</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Pumpability Violation Prob.</div>
+            <div class="kpi-value" id="kpi-mc-pump-prob">—</div>
+            <div class="kpi-sub">Trials exceeding pump rating</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Area Overload Prob.</div>
+            <div class="kpi-value" id="kpi-mc-area-prob">—</div>
+            <div class="kpi-sub">Trials with A_req &gt; A_actual</div>
+          </div>
+        </section>
+
+        <div class="panel-grid">
+          <section class="card">
+            <h3>Uncertainty &amp; Seed Controls</h3>
+            <form id="mc-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Simulations (N)</label>
+                  <input type="number" step="100" min="50" max="5000" name="n_simulations" value="1000" required />
+                </div>
+                <div class="form-group">
+                  <label>Random Seed</label>
+                  <input type="number" step="1" name="random_seed" value="42" required />
+                </div>
+                <div class="form-group">
+                  <label>Feed Rate CV (%)</label>
+                  <input type="number" step="0.5" name="feed_rate_cv_pct" value="10" required />
+                </div>
+                <div class="form-group">
+                  <label>Feed Solids CV (%)</label>
+                  <input type="number" step="0.5" name="feed_solids_cv_pct" value="5" required />
+                </div>
+                <div class="form-group">
+                  <label>Free Settling v₀ CV (%)</label>
+                  <input type="number" step="0.5" name="v0_cv_pct" value="8" required />
+                </div>
+                <div class="form-group">
+                  <label>RZ Exponent n CV (%)</label>
+                  <input type="number" step="0.5" name="rz_n_cv_pct" value="3" required />
+                </div>
+              </div>
+              <div class="btn-row">
+                <button id="btn-run-mc" type="submit" class="btn btn-primary">Run Monte Carlo</button>
+              </div>
+            </form>
+          </section>
+
+          <div>
+            <div class="charts-grid-2">
+              <section class="card"><div id="chart-mc-uf-hist" class="chart-box"></div></section>
+              <section class="card"><div id="chart-mc-pressure-hist" class="chart-box"></div></section>
+            </div>
+            <section class="card"><div id="chart-mc-scatter" class="chart-box"></div></section>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

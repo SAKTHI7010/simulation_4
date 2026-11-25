@@ -1,0 +1,39 @@
+{
+  "csv_path": "C:\\Users\\svel2\\OneDrive\\Documents\\simulator 4\\thickener_digital_twin\\data\\synthetic\\synthetic_thickener_dataset.csv",
+  "data_status": "SYNTHETIC",
+  "row_count": 500,
+  "missing_required_columns": [],
+  "null_counts": {},
+  "duplicate_record_ids": 0,
+  "constraint_checks": {
+    "feed_rate_positive": true,
+    "feed_solids_valid_pct": true,
+    "underflow_denser_than_feed": true,
+    "flocculant_non_negative": true,
+    "clarity_within_0_100": true,
+    "bed_level_non_negative": true,
+    "yield_stress_positive": true,
+    "pump_pressure_positive": true,
+    "pumpability_flag_valid": true,
+    "synthetic_label_present": true
+  },
+  "summary_ranges": {
+    "feed_solids_wt_pct": [
+      4.014,
+      14.986
+    ],
+    "flocculant_dose_gpt": [
+      10.016,
+      39.983
+    ],
+    "underflow_solids_wt_pct": [
+      50.675,
+      69.11
+    ],
+    "pump_pressure_required_bar": [
+      3.753,
+      31.772
+    ]
+  },
+  "passed": true
+}

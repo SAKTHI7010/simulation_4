@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dynamic Simulation — Thickener Digital Twin</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body data-page="dynamics">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-tag">Project 4 • §5.6 &amp; §5.8</span>
+        <h1>Thickener Digital Twin</h1>
+        <p>Settling-Flux &amp; Pumpability Simulator</p>
+      </div>
+      <nav class="nav-links">
+        <a class="nav-link" href="/index.html">1. Dashboard</a>
+        <a class="nav-link" href="/pages/flux.html">2. Settling Flux Analysis</a>
+        <a class="nav-link active" href="/pages/dynamics.html">3. Dynamic Simulation</a>
+        <a class="nav-link" href="/pages/pumpability.html">4. Pumpability Analysis</a>
+        <a class="nav-link" href="/pages/monte_carlo.html">5. Monte Carlo Analysis</a>
+        <a class="nav-link" href="/pages/scenario.html">6. Scenario Analysis</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="health-pill">
+          <span id="health-dot" class="health-dot"></span>
+          <span id="health-text">Checking API...</span>
+        </div>
+        <div>SciPy solve_ivp Inventory Balance</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="synthetic-banner">
+        <span>SYNTHETIC DYNAMIC MODEL — Bed compaction lag τ and bed solids % are explicit assumed parameters. Clarity proxy is UNCALIBRATED.</span>
+        <span class="badge badge-synthetic">SOLIDS INVENTORY ODE</span>
+      </div>
+
+      <div class="page-container">
+        <div class="page-header">
+          <div>
+            <h2>Dynamic Bed-Level &amp; Inventory Simulation</h2>
+            <p>Solids inventory mass balance (dM/dt = incoming dry solids − outgoing dry solids) integrated across feed and withdrawal step changes.</p>
+          </div>
+        </div>
+
+        <div id="page-error" class="alert hidden"></div>
+
+        <section class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Final Bed Level</div>
+            <div class="kpi-value" id="kpi-bed-final">—</div>
+            <div class="kpi-sub" id="kpi-bed-peak">Peak level</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Final Underflow Solids</div>
+            <div class="kpi-value" id="kpi-uf-final">—</div>
+            <div class="kpi-sub">First-order lagged compaction</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Final Clarity Proxy</div>
+            <div class="kpi-value" id="kpi-clarity-final">—</div>
+            <div class="kpi-sub">UNCALIBRATED PROXY</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Mass Balance Closure</div>
+            <div class="kpi-value" id="kpi-mb-closure">—</div>
+            <div class="kpi-sub" id="kpi-mb-status">Integral conservation check</div>
+          </div>
+        </section>
+
+        <div class="panel-grid">
+          <section class="card">
+            <h3>Step-Change Configuration</h3>
+            <div class="btn-row" style="margin-bottom: 12px;">
+              <button type="button" class="btn btn-preset" data-preset="project4">Preset: +20% Feed / −50% Floc</button>
+              <button type="button" class="btn btn-preset" data-preset="withdrawal-drop">Preset: −15% Withdrawal</button>
+              <button type="button" class="btn btn-preset" data-preset="feed-surge">Preset: +30% Feed Surge</button>
+            </div>
+            <form id="dynamics-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Horizon (h)</label>
+                  <input type="number" step="0.5" name="duration_h" value="12" required />
+                </div>
+                <div class="form-group">
+                  <label>Step Time (h)</label>
+                  <input type="number" step="0.5" name="step_time_h" value="2" required />
+                </div>
+                <div class="form-group">
+                  <label>Feed Rate Step (%)</label>
+                  <input type="number" step="1" name="feed_rate_step_pct" value="20" required />
+                </div>
+                <div class="form-group">
+                  <label>Withdrawal Step (%)</label>
+                  <input type="number" step="1" name="underflow_withdrawal_step_pct" value="0" required />
+                </div>
+                <div class="form-group">
+                  <label>Flocculant Step (%)</label>
+                  <input type="number" step="1" name="flocculant_dose_step_pct" value="-50" required />
+                </div>
+                <div class="form-group">
+                  <label>Initial Bed Level (m)</label>
+                  <input type="number" step="0.1" name="bed_level_m" required />
+                </div>
+                <div class="form-group">
+                  <label>Bed Lag τ (h)</label>
+                  <input type="number" step="0.1" name="bed_time_constant_h" value="1.5" required />
+                </div>
+                <div class="form-group">
+                  <label>Bed Avg Solids (% w/w)</label>
+                  <input type="number" step="1" name="bed_average_solids_wt_pct" value="45" required />
+                </div>
+              </div>
+              <div class="btn-row">
+                <button id="btn-run-dynamics" type="submit" class="btn btn-primary">Run Dynamic Simulation</button>
+              </div>
+            </form>
+          </section>
+
+          <div>
+            <div class="charts-grid-2">
+              <section class="card"><div id="chart-dyn-solids-flow" class="chart-box"></div></section>
+              <section class="card"><div id="chart-dyn-withdrawal" class="chart-box"></div></section>
+            </div>
+            <div class="charts-grid-2">
+              <section class="card"><div id="chart-dyn-bed-level" class="chart-box"></div></section>
+              <section class="card"><div id="chart-dyn-underflow" class="chart-box"></div></section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

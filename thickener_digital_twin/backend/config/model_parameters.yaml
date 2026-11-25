@@ -1,0 +1,323 @@
+# Thickener Digital Twin — Explicit Parameter Register & Configuration
+# IMPORTANT: No measured Project 4 plant dataset was supplied.
+# All parameters below marked SYNTHETIC_ASSUMED are configurable engineering defaults
+# for development and must be calibrated against plant / batch-settling data before plant use.
+
+metadata:
+  project_name: "Thickener Digital Twin"
+  source_reference: "Simulation and AI Modeling Projects for Mineral Processing — Project 4 (§5.6, §5.8)"
+  data_status: "SYNTHETIC_UNVALIDATED"
+  disclaimer: "SYNTHETIC DATA & ASSUMED PARAMETERS: Not calibrated to measured plant data."
+
+reference_ranges:
+  feed_solids_wt_pct:
+    min: 4.0
+    max: 15.0
+    unit: "% w/w"
+    status: "SOURCE_INDICATIVE_RANGE"
+    description: "Typical iron-ore tailings feed solids concentration range from Project 4 brief."
+  flocculant_dose_gpt:
+    min: 10.0
+    max: 40.0
+    unit: "g/t"
+    status: "SOURCE_INDICATIVE_RANGE"
+    description: "Typical flocculant dosage range per dry tonne of solids from Project 4 brief."
+  underflow_solids_wt_pct:
+    min: 55.0
+    max: 70.0
+    unit: "% w/w"
+    status: "SOURCE_INDICATIVE_RANGE"
+    description: "Typical underflow solids concentration range from Project 4 brief."
+
+physical_constants:
+  solids_density_kg_m3:
+    value: 3200.0
+    unit: "kg/m3"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Assumed dry solids particle density (typical iron-ore tailings)."
+  liquid_density_kg_m3:
+    value: 1000.0
+    unit: "kg/m3"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Assumed process water density."
+  gravity_m_s2:
+    value: 9.81
+    unit: "m/s2"
+    status: "PHYSICAL_CONSTANT"
+    description: "Standard gravitational acceleration."
+
+operating_defaults:
+  feed_rate_tph:
+    value: 320.0
+    unit: "t/h"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Baseline feed mass flow rate on the selected feed_rate_basis."
+  feed_rate_basis:
+    value: "dry_solids"
+    unit: "dimensionless"
+    status: "CONFIGURABLE_INPUT"
+    description: "Basis for feed_rate_tph: 'dry_solids' or 'slurry'."
+  feed_solids_wt_pct:
+    value: 10.0
+    unit: "% w/w"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Baseline feed solids mass concentration."
+  flocculant_dose_gpt:
+    value: 25.0
+    unit: "g/t"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Baseline flocculant dosage per tonne of dry solids."
+  underflow_withdrawal_tph:
+    value: 505.0
+    unit: "t/h"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Baseline underflow withdrawal rate on underflow_basis."
+  underflow_basis:
+    value: "slurry"
+    unit: "dimensionless"
+    status: "CONFIGURABLE_INPUT"
+    description: "Basis for underflow_withdrawal_tph: 'slurry' or 'dry_solids'."
+  bed_level_m:
+    value: 1.5
+    unit: "m"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Baseline / initial compacted mud bed height."
+
+thickener_geometry:
+  thickener_area_m2:
+    value: 250.0
+    unit: "m2"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Effective thickener cross-sectional settling area (configurable; not plant-measured)."
+  tank_depth_m:
+    value: 4.5
+    unit: "m"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Effective cylindrical sidewall depth available for mud bed and clarified zone."
+  bed_high_alarm_m:
+    value: 3.2
+    unit: "m"
+    status: "SYNTHETIC_ASSUMED"
+    description: "High mud-bed level alarm threshold."
+  bed_low_alarm_m:
+    value: 0.5
+    unit: "m"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Low mud-bed level alarm threshold."
+  bed_average_solids_wt_pct:
+    value: 45.0
+    unit: "% w/w"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Assumed average solids concentration inside the mud bed for inventory-to-level conversion."
+  bed_time_constant_h:
+    value: 1.5
+    unit: "h"
+    status: "SYNTHETIC_ASSUMED"
+    description: "First-order compaction lag time constant for underflow concentration response."
+
+settling_parameters:
+  free_settling_velocity_mph:
+    value: 7.0
+    unit: "m/h"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Unmodified Stokes/free settling velocity v0 before flocculant multiplier."
+  rz_exponent_n:
+    value: 4.65
+    unit: "dimensionless"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Richardson-Zaki hindered settling exponent n."
+  phi_grid_max:
+    value: 0.60
+    unit: "v/v"
+    status: "CONFIGURABLE_INPUT"
+    description: "Upper solids volume fraction evaluated on the flux curve."
+  phi_grid_points:
+    value: 250
+    unit: "count"
+    status: "CONFIGURABLE_INPUT"
+    description: "Grid resolution for settling and solids flux curve evaluation."
+
+flocculant_model:
+  model_type:
+    value: "exponential"
+    unit: "dimensionless"
+    status: "CONFIGURABLE_INPUT"
+    description: "Bounded dose-response model: 'exponential' or 'power_law'."
+  min_modifier:
+    value: 0.25
+    unit: "dimensionless"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Lower bound multiplier at 0 g/t flocculant (unflocculated settling fraction)."
+  max_modifier:
+    value: 1.45
+    unit: "dimensionless"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Upper asymptotic multiplier representing diminishing returns at high flocculant dose."
+  characteristic_dose_gpt:
+    value: 18.0
+    unit: "g/t"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Exponential dose-response characteristic constant d_c."
+  power_k:
+    value: 0.90
+    unit: "dimensionless"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Power-law gain coefficient k."
+  power_ref_dose_gpt:
+    value: 25.0
+    unit: "g/t"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Power-law reference flocculant dose d_ref."
+  power_alpha:
+    value: 0.55
+    unit: "dimensionless"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Power-law diminishing-returns exponent alpha (0 < alpha < 1)."
+
+underflow_compaction:
+  base_underflow_wt_pct:
+    value: 63.0
+    unit: "% w/w"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Nominal achievable compaction underflow % w/w at reference loading, bed, and flocculation."
+  ref_flux_loading_ratio:
+    value: 0.70
+    unit: "dimensionless"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Reference area utilization ratio (A_required / A_actual)."
+  flux_loading_sensitivity:
+    value: 8.5
+    unit: "% w/w per unit ratio"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Compaction penalty slope when solids flux loading increases above reference."
+  ref_bed_level_m:
+    value: 1.5
+    unit: "m"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Reference bed depth for compressive thickening."
+  bed_level_sensitivity:
+    value: 2.5
+    unit: "% w/w per m"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Compressive bed-height gain sensitivity."
+  ref_floc_modifier:
+    value: 1.15
+    unit: "dimensionless"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Reference flocculant modifier for compaction."
+  floc_compaction_sensitivity:
+    value: 4.0
+    unit: "% w/w per modifier unit"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Compaction sensitivity to flocculant settling modifier."
+  opt_feed_solids_wt_pct:
+    value: 10.0
+    unit: "% w/w"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Optimal feed concentration for flocculation dilution."
+  feed_solids_penalty:
+    value: 0.25
+    unit: "% w/w per % feed solids"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Penalty for deviation from optimal feed dilution."
+  min_underflow_wt_pct:
+    value: 40.0
+    unit: "% w/w"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Physical lower bound on compaction underflow solids."
+  max_underflow_wt_pct:
+    value: 72.0
+    unit: "% w/w"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Physical maximum packing concentration bound."
+
+overflow_clarity_proxy:
+  c_rise_ratio:
+    value: 0.85
+    unit: "dimensionless"
+    status: "UNCALIBRATED_SYNTHETIC_PROXY"
+    description: "Weight on upflow velocity vs hindered settling velocity ratio."
+  c_flux_overload:
+    value: 1.20
+    unit: "dimensionless"
+    status: "UNCALIBRATED_SYNTHETIC_PROXY"
+    description: "Weight on limiting-flux overload penalty."
+  c_bed_freeboard:
+    value: 2.50
+    unit: "dimensionless"
+    status: "UNCALIBRATED_SYNTHETIC_PROXY"
+    description: "Weight on high mud-bed freeboard encroachment penalty."
+  c_floc_deficit:
+    value: 0.90
+    unit: "dimensionless"
+    status: "UNCALIBRATED_SYNTHETIC_PROXY"
+    description: "Weight on under-flocculation fine-solids carryover penalty."
+
+rheology_and_pumpability:
+  rheology_a_pa:
+    value: 0.055
+    unit: "Pa"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Synthetic exponential yield-stress pre-exponential constant a in tau_y = a * exp(b * phi)."
+  rheology_b:
+    value: 21.3
+    unit: "dimensionless"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Synthetic exponential yield-stress slope b in tau_y = a * exp(b * phi)."
+  plastic_viscosity_pa_s:
+    value: 0.08
+    unit: "Pa.s"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Assumed Bingham plastic viscosity of underflow slurry."
+  pipe_length_m:
+    value: 300.0
+    unit: "m"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Assumed underflow discharge pipeline equivalent length (configurable input)."
+  pipe_diameter_m:
+    value: 0.20
+    unit: "m"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Assumed internal pipe diameter of underflow line (configurable input)."
+  static_elevation_head_m:
+    value: 15.0
+    unit: "m"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Assumed static discharge elevation gain from underflow pump to destination."
+  available_pump_pressure_bar:
+    value: 15.0
+    unit: "bar"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Configured positive-displacement underflow pump pressure rating (configurable input)."
+
+monte_carlo:
+  n_simulations:
+    value: 1000
+    unit: "runs"
+    status: "CONFIGURABLE_INPUT"
+    description: "Default number of Monte Carlo trials."
+  random_seed:
+    value: 42
+    unit: "integer"
+    status: "CONFIGURABLE_INPUT"
+    description: "Reproducible NumPy Generator seed."
+  feed_rate_cv_pct:
+    value: 10.0
+    unit: "%"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Assumed coefficient of variation for feed rate normal distribution."
+  feed_solids_cv_pct:
+    value: 5.0
+    unit: "%"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Assumed coefficient of variation for feed solids % w/w."
+  v0_cv_pct:
+    value: 8.0
+    unit: "%"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Assumed coefficient of variation for free settling velocity v0."
+  rz_n_cv_pct:
+    value: 3.0
+    unit: "%"
+    status: "SYNTHETIC_ASSUMED"
+    description: "Assumed coefficient of variation for Richardson-Zaki exponent n."

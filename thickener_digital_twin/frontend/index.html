@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — Thickener Digital Twin (Project 4)</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body data-page="dashboard">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-tag">Project 4 • §5.6 &amp; §5.8</span>
+        <h1>Thickener Digital Twin</h1>
+        <p>Settling-Flux &amp; Pumpability Simulator</p>
+      </div>
+      <nav class="nav-links">
+        <a class="nav-link active" href="/index.html">1. Dashboard</a>
+        <a class="nav-link" href="/pages/flux.html">2. Settling Flux Analysis</a>
+        <a class="nav-link" href="/pages/dynamics.html">3. Dynamic Simulation</a>
+        <a class="nav-link" href="/pages/pumpability.html">4. Pumpability Analysis</a>
+        <a class="nav-link" href="/pages/monte_carlo.html">5. Monte Carlo Analysis</a>
+        <a class="nav-link" href="/pages/scenario.html">6. Scenario Analysis</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="health-pill">
+          <span id="health-dot" class="health-dot"></span>
+          <span id="health-text">Checking API...</span>
+        </div>
+        <div>Physics-first FastAPI + Plotly.js</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="synthetic-banner">
+        <span>SYNTHETIC DATA &amp; ASSUMED PARAMETERS — Development model only; not calibrated to measured plant data.</span>
+        <span class="badge badge-synthetic">Data Status: SYNTHETIC_UNVALIDATED</span>
+      </div>
+
+      <div class="page-container">
+        <div class="page-header">
+          <div>
+            <h2>Operating Dashboard</h2>
+            <p>Real-time physics-based prediction of underflow density, overflow clarity proxy, bed inventory, and pumpability.</p>
+          </div>
+          <span class="badge badge-synthetic">Project 4 Reference Ranges: Feed 4–15% • Floc 10–40 g/t • UF 55–70%</span>
+        </div>
+
+        <div id="page-error" class="alert hidden"></div>
+
+        <section class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Feed Rate</div>
+            <div class="kpi-value" id="kpi-feed-rate">—</div>
+            <div class="kpi-sub" id="kpi-feed-rate-sub">Dry-solids basis</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Feed Solids</div>
+            <div class="kpi-value" id="kpi-feed-solids">—</div>
+            <div class="kpi-sub" id="kpi-feed-phi">Volume fraction φ</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Predicted Underflow Solids</div>
+            <div class="kpi-value" id="kpi-uf-solids">—</div>
+            <div class="kpi-sub" id="kpi-uf-regime">Compaction &amp; mass balance</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Bed Level</div>
+            <div class="kpi-value" id="kpi-bed-level">—</div>
+            <div class="kpi-sub" id="kpi-bed-sub">Inventory balance</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Overflow Clarity Proxy</div>
+            <div class="kpi-value" id="kpi-clarity">—</div>
+            <div class="kpi-sub" id="kpi-clarity-sub">UNCALIBRATED PROXY</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Pumpability Status</div>
+            <div class="kpi-value" id="kpi-pump-status">—</div>
+            <div class="kpi-sub" id="kpi-pump-sub">Pressure check</div>
+          </div>
+        </section>
+
+        <div class="panel-grid">
+          <section class="card">
+            <h3>Operating &amp; Plant Inputs</h3>
+            <form id="dashboard-form">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label>Feed Rate (t/h)</label>
+                  <input type="number" step="1" name="feed_rate_tph" required />
+                </div>
+                <div class="form-group">
+                  <label>Feed Rate Basis</label>
+                  <select name="feed_rate_basis">
+                    <option value="dry_solids">Dry Solids (t/h)</option>
+                    <option value="slurry">Total Slurry (t/h)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Feed Solids (% w/w)</label>
+                  <input type="number" step="0.1" name="feed_solids_wt_pct" required />
+                </div>
+                <div class="form-group">
+                  <label>Flocculant Dose (g/t)</label>
+                  <input type="number" step="0.5" name="flocculant_dose_gpt" required />
+                </div>
+                <div class="form-group">
+                  <label>Underflow Withdrawal (t/h)</label>
+                  <input type="number" step="1" name="underflow_withdrawal_tph" required />
+                </div>
+                <div class="form-group">
+                  <label>Withdrawal Basis</label>
+                  <select name="underflow_basis">
+                    <option value="slurry">Slurry (t/h)</option>
+                    <option value="dry_solids">Dry Solids (t/h)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>Current Bed Level (m)</label>
+                  <input type="number" step="0.1" name="bed_level_m" required />
+                </div>
+                <div class="form-group">
+                  <label>Thickener Area (m²)</label>
+                  <input type="number" step="5" name="thickener_area_m2" required />
+                </div>
+              </div>
+
+              <details class="accordion">
+                <summary>Advanced Settling, Geometry &amp; Pump Configuration (Assumed Defaults)</summary>
+                <div class="form-grid" style="margin-top: 10px;">
+                  <div class="form-group">
+                    <label>Free Settling v₀ (m/h)</label>
+                    <input type="number" step="0.1" name="free_settling_velocity_mph" />
+                  </div>
+                  <div class="form-group">
+                    <label>Richardson-Zaki n</label>
+                    <input type="number" step="0.05" name="rz_exponent_n" />
+                  </div>
+                  <div class="form-group">
+                    <label>Flocculant Model</label>
+                    <select name="model_type">
+                      <option value="exponential">Exponential</option>
+                      <option value="power_law">Power Law</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Tank Depth (m)</label>
+                    <input type="number" step="0.1" name="tank_depth_m" />
+                  </div>
+                  <div class="form-group">
+                    <label>Available Pump Press. (bar)</label>
+                    <input type="number" step="0.5" name="available_pump_pressure_bar" />
+                  </div>
+                  <div class="form-group">
+                    <label>Pipe Length (m)</label>
+                    <input type="number" step="10" name="pipe_length_m" />
+                  </div>
+                  <div class="form-group">
+                    <label>Pipe Diameter (m)</label>
+                    <input type="number" step="0.01" name="pipe_diameter_m" />
+                  </div>
+                  <div class="form-group">
+                    <label>Solids Density (kg/m³)</label>
+                    <input type="number" step="50" name="solids_density_kg_m3" />
+                  </div>
+                </div>
+              </details>
+
+              <div class="btn-row">
+                <button id="btn-run-sim" type="submit" class="btn btn-primary">Run Simulation</button>
+                <button id="btn-reset-defaults" type="button" class="btn btn-secondary">Reset Defaults</button>
+              </div>
+            </form>
+          </section>
+
+          <div>
+            <section class="card">
+              <h3>Calibration Range &amp; Constraint Diagnostics</h3>
+              <div id="dashboard-warnings"></div>
+            </section>
+
+            <div class="charts-grid-2">
+              <section class="card">
+                <div id="chart-area-pressure" class="chart-box"></div>
+              </section>
+              <section class="card">
+                <div id="chart-pump-overview" class="chart-box"></div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <section class="card">
+          <h3>Synthetic Reference Dataset Preview (SYNTHETIC — For Development Only)</h3>
+          <p id="dataset-preview-meta" style="font-size: 13px; color: #475569;">Loading synthetic dataset summary...</p>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Label</th>
+                  <th>Feed (t/h)</th>
+                  <th>Feed %</th>
+                  <th>Floc (g/t)</th>
+                  <th>UF % w/w</th>
+                  <th>Clarity Proxy</th>
+                  <th>Pump Req.</th>
+                  <th>Pump Status</th>
+                </tr>
+              </thead>
+              <tbody id="dataset-preview-body"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="/js/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Scenario Analysis — Thickener Digital Twin</title>
+  <link rel="stylesheet" href="/css/styles.css" />
+  <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body data-page="scenario">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-tag">Project 4 • §5.6 &amp; §5.8</span>
+        <h1>Thickener Digital Twin</h1>
+        <p>Settling-Flux &amp; Pumpability Simulator</p>
+      </div>
+      <nav class="nav-links">
+        <a class="nav-link" href="/index.html">1. Dashboard</a>
+        <a class="nav-link" href="/pages/flux.html">2. Settling Flux Analysis</a>
+        <a class="nav-link" href="/pages/dynamics.html">3. Dynamic Simulation</a>
+        <a class="nav-link" href="/pages/pumpability.html">4. Pumpability Analysis</a>
+        <a class="nav-link" href="/pages/monte_carlo.html">5. Monte Carlo Analysis</a>
+        <a class="nav-link active" href="/pages/scenario.html">6. Scenario Analysis</a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="health-pill">
+          <span id="health-dot" class="health-dot"></span>
+          <span id="health-text">Checking API...</span>
+        </div>
+        <div>Project 4 Operator Question</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="synthetic-banner">
+        <span>SYNTHETIC MODEL COMPARISON — Predictions reflect physics equations + assumed uncalibrated parameters; inspect calibration warnings below.</span>
+        <span class="badge badge-synthetic">BASELINE VS SCENARIO</span>
+      </div>
+
+      <div class="page-container">
+        <div class="page-header">
+          <div>
+            <h2>Scenario Comparison (+20% Feed &amp; Half Flocculant Dose)</h2>
+            <p>“What underflow density will I achieve if I increase feed rate by 20% and cut flocculant dose by half?”</p>
+          </div>
+          <button id="btn-preset-p4" type="button" class="btn btn-preset">Apply +20% Feed / −50% Floc Preset</button>
+        </div>
+
+        <div id="page-error" class="alert hidden"></div>
+        <div id="scenario-verdict" class="alert alert-info">Running scenario comparison...</div>
+
+        <div id="scenario-form-wrap" class="charts-grid-2">
+          <section class="card">
+            <h3>Baseline Operating Point</h3>
+            <form id="scenario-base-form" class="form-grid">
+              <div class="form-group">
+                <label>Feed Rate (t/h)</label>
+                <input type="number" step="1" name="feed_rate_tph" required />
+              </div>
+              <div class="form-group">
+                <label>Feed Solids (% w/w)</label>
+                <input type="number" step="0.1" name="feed_solids_wt_pct" required />
+              </div>
+              <div class="form-group">
+                <label>Flocculant Dose (g/t)</label>
+                <input type="number" step="0.5" name="flocculant_dose_gpt" required />
+              </div>
+              <div class="form-group">
+                <label>Underflow Withdrawal (t/h)</label>
+                <input type="number" step="1" name="underflow_withdrawal_tph" required />
+              </div>
+              <div class="form-group">
+                <label>Thickener Area (m²)</label>
+                <input type="number" step="5" name="thickener_area_m2" required />
+              </div>
+              <div class="form-group">
+                <label>Available Pump Press. (bar)</label>
+                <input type="number" step="0.5" name="available_pump_pressure_bar" required />
+              </div>
+            </form>
+          </section>
+
+          <section class="card">
+            <h3>Modified Scenario</h3>
+            <form id="scenario-mod-form" class="form-grid">
+              <div class="form-group">
+                <label>Feed Rate (t/h)</label>
+                <input type="number" step="1" name="feed_rate_tph" required />
+              </div>
+              <div class="form-group">
+                <label>Feed Solids (% w/w)</label>
+                <input type="number" step="0.1" name="feed_solids_wt_pct" required />
+              </div>
+              <div class="form-group">
+                <label>Flocculant Dose (g/t)</label>
+                <input type="number" step="0.5" name="flocculant_dose_gpt" required />
+              </div>
+              <div class="form-group">
+                <label>Underflow Withdrawal (t/h)</label>
+                <input type="number" step="1" name="underflow_withdrawal_tph" required />
+              </div>
+              <div class="form-group">
+                <label>Thickener Area (m²)</label>
+                <input type="number" step="5" name="thickener_area_m2" required />
+              </div>
+              <div class="form-group">
+                <label>Available Pump Press. (bar)</label>
+                <input type="number" step="0.5" name="available_pump_pressure_bar" required />
+              </div>
+            </form>
+            <div class="btn-row">
+              <button id="btn-run-scenario" type="button" class="btn btn-primary">Compare Scenarios</button>
+            </div>
+          </section>
+        </div>
+
+        <section class="card">
+          <h3>Output Deltas &amp; Calibration Warnings</h3>
+          <div id="scenario-warnings" style="margin-bottom: 12px;"></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Metric</th>
+                  <th>Baseline</th>
+                  <th>Modified</th>
+                  <th>Delta</th>
+                  <th>% Change</th>
+                </tr>
+              </thead>
+              <tbody id="scenario-delta-body"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="charts-grid-2">
+          <section class="card"><div id="chart-scenario-bars" class="chart-box"></div></section>
+          <section class="card"><div id="chart-scenario-flux" class="chart-box"></div></section>
+        </div>
+        <section class="card"><div id="chart-scenario-bed" class="chart-box"></div></section>
+      </div>
+    </main>
+  </div>
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>
